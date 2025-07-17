@@ -1,0 +1,154 @@
+{
+    "name": "etl-dat-cp",
+    "properties": {
+        "activities": [
+            {
+                "name": "job-workflow",
+                "type": "DatabricksJob",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "jobId": "1077813658163417"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adat_projectfinal",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "load storage to sql",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "job-workflow",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "ParquetSource",
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "recursive": true,
+                            "wildcardFileName": "*.parquet",
+                            "enablePartitionDiscovery": false
+                        },
+                        "formatSettings": {
+                            "type": "ParquetReadSettings"
+                        }
+                    },
+                    "sink": {
+                        "type": "AzureSqlSink",
+                        "preCopyScript": "delete from [projectFinal].[DeudaCliente]",
+                        "writeBehavior": "insert",
+                        "sqlWriterUseTableLock": false,
+                        "disableMetricsCollection": false
+                    },
+                    "enableStaging": true,
+                    "stagingSettings": {
+                        "linkedServiceName": {
+                            "referenceName": "ls_staging",
+                            "type": "LinkedServiceReference"
+                        },
+                        "path": "gold/staging"
+                    },
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "mappings": [
+                            {
+                                "source": {
+                                    "name": "key_value",
+                                    "type": "Int"
+                                },
+                                "sink": {
+                                    "name": "key_value",
+                                    "type": "Int32"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "codmes",
+                                    "type": "Int"
+                                },
+                                "sink": {
+                                    "name": "codmes",
+                                    "type": "Int32"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "nivel_deudaTC_total",
+                                    "type": "Double"
+                                },
+                                "sink": {
+                                    "name": "nivel_deudaTC_total",
+                                    "type": "Decimal"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "tipcontribuyente",
+                                    "type": "Int"
+                                },
+                                "sink": {
+                                    "name": "tipcontribuyente",
+                                    "type": "Int32"
+                                }
+                            },
+                            {
+                                "source": {
+                                    "name": "tippersona",
+                                    "type": "Int"
+                                },
+                                "sink": {
+                                    "name": "tippersona",
+                                    "type": "Int32"
+                                }
+                            }
+                        ],
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "parquet_gold",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "gold_deudacliente",
+                        "type": "DatasetReference"
+                    }
+                ]
+            }
+        ],
+        "folder": {
+            "name": "ProjectFinal"
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-07-17T02:12:40Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
