@@ -1,8 +1,8 @@
--- Crear el nuevo esquema llamado 'projectFinal'
+-- Crear nuevo esquema llamado 'projectFinal'
 CREATE SCHEMA [projectFinal];
 GO
 
--- Crear la tabla 'DeudaCliente' dentro del esquema 'SunatData'
+-- Crear la tabla 'DeudaCliente'
 CREATE TABLE [projectFinal].[DeudaCliente] (
     [key_value] INT,
     [codmes] INT,
